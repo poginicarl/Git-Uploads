@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "725914385129",
+    "project_id": "taravel-prod-db",
+    "storage_bucket": "taravel-prod-db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:725914385129:android:99d456fa936c14ce844e78",
+        "android_client_info": {
+          "package_name": "com.example.tara_velprototype"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCe9_kR78nMIR0PyBR-nWInX8_41Wgzn24"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
