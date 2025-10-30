@@ -34,7 +34,7 @@ io.on("connection", (socket) => {
     io.to("user").emit("locationUpdate", {
       ...data,
       from: "driver",
-      accountId: data.accountId, // ✅ PASS THE ACCOUNT ID
+      accountId: data.accountId, // ✅ Explicitly passes accountId (as it was)
     });
    } else if (socket.role === "user") {
     io.to("driver").emit("userLocation", {
@@ -53,6 +53,8 @@ io.on("connection", (socket) => {
   io.to("user").emit("routeUpdate", {
     ...data,
     from: "driver",
+    // ✅ FIX: Explicitly include accountId to ensure the Android client can track the route
+    accountId: data.accountId, 
    });
   });
 
