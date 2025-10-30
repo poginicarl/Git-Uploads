@@ -8,10 +8,13 @@ const io = new Server(server, {
   cors: { origin: "*" },
 });
 
+// Optional: in-memory data store for active drivers
+const drivers = {};
+
 io.on("connection", (socket) => {
   console.log("✅ A client connected:", socket.id);
 
-// PARA SA ROLE NG APPLICATION
+  // ROLE REGISTRATION
   socket.on("registerRole", (role) => {
     if (role === "user" || role === "driver") {
       socket.role = role;
@@ -22,20 +25,16 @@ io.on("connection", (socket) => {
     }
   });
 
-  // LOCATION UPDATE NIGGAS
+  // LOCATION UPDATES
   socket.on("updateLocation", (data) => {
     console.log(`📍 Location from ${socket.role}:`, data);
 
-    // DRIVER SEND A LOC SA USERS
     if (socket.role === "driver") {
       io.to("user").emit("locationUpdate", {
         ...data,
         from: "driver",
       });
-    }
-
-    // USER SENDS
-    else if (socket.role === "user") {
+    } else if (socket.role === "user") {
       io.to("driver").emit("userLocation", {
         ...data,
         from: "user",
@@ -43,9 +42,42 @@ io.on("connection", (socket) => {
     }
   });
 
-  // 3️⃣ Handle disconnects
+  // ROUTE UPDATE (driver → users)
+  socket.on("routeUpdate", (data) => {
+    console.log("🛣️ Route data received from driver:", data);
+
+    // Broadcast route geometry (polyline) to all users
+    io.to("user").emit("routeUpdate", {
+      ...data,
+      from: "driver",
+    });
+  });
+
+  // 🧍 PASSENGER COUNT UPDATES (driver → users)
+  socket.on("passengerUpdate", (data) => {
+    const { accountId, passengerCount } = data;
+    console.log(`🧍 Passenger count update from driver ${accountId}: ${passengerCount}`);
+
+    // Store latest passenger count per driver
+    if (accountId) {
+      drivers[accountId] = {
+        ...drivers[accountId],
+        passengerCount,
+        lastUpdated: new Date().toISOString(),
+      };
+    }
+
+    // Broadcast passenger count to all connected users
+    io.to("user").emit("passengerCountUpdate", {
+      accountId,
+      passengerCount,
+      from: "driver",
+    });
+  });
+
+  // DISCONNECT HANDLER
   socket.on("disconnect", () => {
-    console.log(`❌ Client disconnected: ${socket.id} (${socket.role})`);
+    console.log(`❌ Client disconnected: ${socket.id} (${socket.role || "unknown"})`);
   });
 });
 
